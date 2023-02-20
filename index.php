@@ -84,7 +84,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     const messageInput = document.getElementById("messageInput");
     const sendMessage = document.getElementById("sendMessage");
     const messages = document.getElementById("messages");
-    const loading = document.getElementById("loading");
+    
     // Send message when submit button is clicked
     sendMessage.addEventListener("click", (event) => {
     event.preventDefault();
@@ -116,7 +116,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     .then((data) => {
 	  
 	  sendMessage.innerText = 'Send';
-      sendMessage.disabled = false;
+	  sendMessage.disabled = false;
 	  messageInput.disabled = false;
 	  messageInput.focus();
 	  
