@@ -1,10 +1,10 @@
 <?php
+
 /*
  Get OPENAI_API_KEY
  here (accessToken): https://chat.openai.com/api/auth/session
  or here (API key): https://platform.openai.com/account/api-keys
 */
-
 define('OPENAI_API_KEY', '');
 
 function openai($message){
@@ -27,6 +27,13 @@ function openai($message){
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $response  = curl_exec($ch);
+  if (curl_errno($ch)) {
+    $return = [
+      'error' => '<span style="color:red">' . curl_error($ch) . '</span>'
+    ];
+    curl_close($ch);
+    return $return;
+  }
   curl_close($ch);
   $arr = json_decode($response, 1);
 
@@ -34,7 +41,7 @@ function openai($message){
     'message' => ''
   ];
   if(!empty($arr['error'])){
-    $return['message'] = '<span style="color:red">' . $arr['error']['message'] . '</span>';
+    $return['error'] = '<span style="color:red">' . $arr['error']['message'] . '</span>';
   }
   elseif(!empty($arr['choices'])){
 	$return['message'] = trim($arr['choices'][0]['text']);
@@ -44,9 +51,9 @@ function openai($message){
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){
   $arr = json_decode(file_get_contents('php://input'), true);
-  $message = $arr['message'] ?? '';
-  if(!empty($message)){
-    $openai = openai($message);
+  if(!empty($arr['message'])){
+    $openai = openai($arr['message']);
+    header('Content-Type: application/json');
     die(json_encode($openai));
   }
 }
@@ -124,7 +131,12 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
           // Display the response from the server
           const messageElement = document.createElement("div");
           const p = document.createElement("p");
-          p.innerText = 'Server: ' + data.message;
+		  if(data.hasOwnProperty('error')){
+			p.innerHTML = 'Server: ' + data.error;
+		  }
+		  else if (data.hasOwnProperty('message')) {
+			p.innerText = 'Server: ' + data.message;
+		  }
           messageElement.appendChild(p);
           messages.appendChild(messageElement);
         });
