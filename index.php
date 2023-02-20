@@ -44,7 +44,7 @@ function openai($message){
     $return['error'] = '<span style="color:red">' . $arr['error']['message'] . '</span>';
   }
   elseif(!empty($arr['choices'])){
-	$return['message'] = trim($arr['choices'][0]['text']);
+    $return['message'] = trim($arr['choices'][0]['text']);
   }
   return $return;
 }
@@ -131,12 +131,12 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
           // Display the response from the server
           const messageElement = document.createElement("div");
           const p = document.createElement("p");
-		  if(data.hasOwnProperty('error')){
-			p.innerHTML = 'Server: ' + data.error;
-		  }
-		  else if (data.hasOwnProperty('message')) {
-			p.innerText = 'Server: ' + data.message;
-		  }
+          if(data.hasOwnProperty('error')){
+            p.innerHTML = 'Server: ' + data.error;
+          }
+          else if (data.hasOwnProperty('message')) {
+            p.innerText = 'Server: ' + data.message;
+          }
           messageElement.appendChild(p);
           messages.appendChild(messageElement);
         });
