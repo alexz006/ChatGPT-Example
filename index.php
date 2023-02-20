@@ -30,22 +30,24 @@ function openai($message){
   curl_close($ch);
   $arr = json_decode($response, 1);
 
-  $return['message'] = '';
+  $return = [
+    'message' => ''
+  ];
   if(!empty($arr['error'])){
     $return['message'] = '<span style="color:red">' . $arr['error']['message'] . '</span>';
   }
   elseif(!empty($arr['choices'])){
 	$return['message'] = trim($arr['choices'][0]['text']);
   }
-  return json_encode($return);
+  return $return;
 }
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){
   $arr = json_decode(file_get_contents('php://input'), true);
-  $message = $arr['message'];
+  $message = $arr['message'] ?? '';
   if(!empty($message)){
     $openai = openai($message);
-    die($openai);
+    die(json_encode($openai));
   }
 }
 
