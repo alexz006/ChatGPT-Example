@@ -52,29 +52,29 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 ?><!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous"
-      />
-    <title>СhatGPT</title>
+    >
+    <title>ChatGPT</title>
   </head>
   <body>
     <div class="container">
-      <h1 class="text-center">СhatGPT</h1>
+      <h1 class="text-center">ChatGPT</h1>
       <div class="messages" id="messages">
         <!-- Messages will be displayed here -->
       </div>
       <form method="post">
         <div class="form-group">
-          <input type="text" class="form-control" id="messageInput" placeholder="Enter a message" />
+          <input type="text" class="form-control" id="messageInput" placeholder="Enter a message">
         </div>
         <button type="submit" class="btn btn-primary" id="sendMessage">
-        Send
+          Send
         </button>
       </form>
     </div>
@@ -84,49 +84,48 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     const messageInput = document.getElementById("messageInput");
     const sendMessage = document.getElementById("sendMessage");
     const messages = document.getElementById("messages");
-    
+
     // Send message when submit button is clicked
     sendMessage.addEventListener("click", (event) => {
-    event.preventDefault();
-    
-    // Get the message from the input field
-    const message = messageInput.value;
-    
-	sendMessage.innerText = 'loading...';
-	sendMessage.disabled = true;
-	messageInput.disabled = true;
-    
-    // Create a new message element
-    const messageElement = document.createElement("div");
-    messageElement.innerHTML = '<p>You: ' + message + '</p>';
-    messages.appendChild(messageElement);
-    
-    // Clear the input field
-    messageInput.value = "";
-    
-    // Send the message to the server
-    fetch("/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message: message }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-	  
-	  sendMessage.innerText = 'Send';
-	  sendMessage.disabled = false;
-	  messageInput.disabled = false;
-	  messageInput.focus();
-	  
-      // Display the response from the server
+      event.preventDefault();
+
+      // Get the message from the input field
+      const message = messageInput.value;
+
+      sendMessage.innerText = 'loading...';
+      sendMessage.disabled = true;
+      messageInput.disabled = true;
+
+      // Create a new message element
       const messageElement = document.createElement("div");
-	  const p = document.createElement("p");
-      p.innerText = 'Server: ' + data.message;
-      messageElement.appendChild(p);
+      messageElement.innerHTML = '<p>You: ' + message + '</p>';
       messages.appendChild(messageElement);
-    });
+
+      // Clear the input field
+      messageInput.value = "";
+
+      // Send the message to the server
+      fetch("/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: message }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          sendMessage.innerText = 'Send';
+          sendMessage.disabled = false;
+          messageInput.disabled = false;
+          messageInput.focus();
+
+          // Display the response from the server
+          const messageElement = document.createElement("div");
+          const p = document.createElement("p");
+          p.innerText = 'Server: ' + data.message;
+          messageElement.appendChild(p);
+          messages.appendChild(messageElement);
+        });
     });
   </script>
 </html>
