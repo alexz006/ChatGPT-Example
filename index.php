@@ -56,85 +56,89 @@ include "openai_api.php"; // API
   
     var parent_message_id = '';
   
+    conversationId.value = getCookie("conversation_id");
+  
     messageInput.focus();
   
     // Send message when submit button is clicked
   function sendMessageHandler(event) {
     if (event.type != "click" && !(event.type == "keydown" && event.ctrlKey && event.keyCode == 13))
-    return;
-      event.preventDefault();
-    
+      return;
+    event.preventDefault();
+
     // Get the message from the input field
-      const message = messageInput.value;
+    const message = messageInput.value;
     if (!message.trim()) {
       messageInput.focus();
       return;
     }
-    
-      const conversation_id = conversationId.value;
-    
-      sendMessage.innerText = 'loading...';
-      conversationId.disabled = true;
-      sendMessage.disabled = true;
-      messageInput.disabled = true;
 
-      // Create a new message element
-      const messageElement = document.createElement("div");
-      messageElement.innerHTML = '<p>You: ' + replaceHTML(message) + '</p>';
-      messages.appendChild(document.createElement("hr"));
-      messages.appendChild(messageElement);
+    const conversation_id = conversationId.value;
+    
+    sendMessage.innerText = 'loading...';
+    conversationId.disabled = true;
+    sendMessage.disabled = true;
+    messageInput.disabled = true;
 
-      // Clear the input field
-      messageInput.value = "";
+    // Create a new message element
+    const messageElement = document.createElement("div");
+    messageElement.innerHTML = '<p>You: ' + replaceHTML(message) + '</p>';
+    messages.appendChild(document.createElement("hr"));
+    messages.appendChild(messageElement);
+
+    // Clear the input field
+    messageInput.value = "";
     messageInputResize();
 
-      // Send the message to the server
-      fetch('', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: message,
-          conversation_id: conversation_id,
-          parent_message_id: parent_message_id
-        }),
-      })
-      .then((response) => response.json())
-      .then((data) => {
-      
-        sendMessage.innerText = 'Send';
-        sendMessage.disabled = false;
-        messageInput.disabled = false;
-        messageInput.focus();
-
-        // Display the response from the server
-        const messageElement = document.createElement("div");
-        const p = document.createElement("p");
+    // Send the message to the server
+    fetch('', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: message,
+        conversation_id: conversation_id,
+        parent_message_id: parent_message_id
+      }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
     
-        if(data.hasOwnProperty('error')){
-          p.innerHTML = 'Server: ' + data.error.msg;
-        }
-        else if (data.hasOwnProperty('message')) {
-      p.innerHTML = 'Server: ' + marked(data.message);
-          conversationId.value = data.conversation_id; // set conversation_id
-          parent_message_id = data.parent_message_id; // set parent_message_id
-        }
-        messageElement.appendChild(p);
-    messages.appendChild(document.createElement("hr"));
-        messages.appendChild(messageElement);
-    document.querySelectorAll("pre code").forEach((block) => {
-          hljs.highlightBlock(block);
-        });
-      })
-      .catch(error => {
-        console.error(error);
     sendMessage.innerText = 'Send';
-        sendMessage.disabled = false;
-        messageInput.disabled = false;
-        messageInput.focus();
-      });
+    sendMessage.disabled = false;
+    messageInput.disabled = false;
+    messageInput.focus();
+
+    // Display the response from the server
+    const messageElement = document.createElement("div");
+    const p = document.createElement("p");
+
+    if(data.hasOwnProperty('error')){
+      p.innerHTML = 'Server: ' + data.error.msg;
     }
+    else if (data.hasOwnProperty('message')) {
+      p.innerHTML = 'Server: ' + marked(data.message);
+      conversationId.value = data.conversation_id; // set conversation_id
+      parent_message_id = data.parent_message_id; // set parent_message_id
+    setCookie("conversation_id",conversation_id,365);
+    }
+    messageElement.appendChild(p);
+    messages.appendChild(document.createElement("hr"));
+    messages.appendChild(messageElement);
+    document.querySelectorAll("pre code").forEach((block) => {
+      hljs.highlightBlock(block);
+    });
+    window.scrollTo(0, document.body.scrollHeight);
+    })
+    .catch(error => {
+      console.error(error);
+      sendMessage.innerText = 'Send';
+      sendMessage.disabled = false;
+      messageInput.disabled = false;
+      messageInput.focus();
+    });
+  }
   
   sendMessage.addEventListener("click", sendMessageHandler);
   document.addEventListener("keydown", sendMessageHandler);
@@ -161,6 +165,26 @@ include "openai_api.php"; // API
     str = str.replace(new RegExp(jsEntities[i][0], 'g'), jsEntities[i][1]);
     }
     return str;
+  }
+  
+  function setCookie(name,value,days){
+    let expires = "";
+    if (days){
+      let date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  }
+  function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+      let c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1,c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return '';
   }
   </script>
 </html>
