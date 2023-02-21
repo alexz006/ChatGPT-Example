@@ -4,7 +4,7 @@ A simple example of an API request and the output of messages to the browser
 
 The code for this example was generated using ChatGPT
 
-![ChatGPT-Example](chat-gpt.jpg)
+![ChatGPT-Example](chatgpt.jpg)
 
 ## Usage
 
