@@ -72,8 +72,8 @@ function openai_chat($arr){
       return ["error" => (
         is_array($decoded_line["detail"])?
           (!empty($decoded_line["detail"]["message"])?
-			["msg"=>$decoded_line["detail"]["message"]]:
-			$decoded_line["detail"][0]):
+      ["msg"=>$decoded_line["detail"]["message"]]:
+      $decoded_line["detail"][0]):
           ["msg"=>$decoded_line["detail"]]
       )];
     
@@ -94,14 +94,14 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
   if(!empty($arr['message'])){
     header('Content-Type: application/json');
     
-	$arr['conversation_id'] = $arr['conversation_id'] ?? '';
+  $arr['conversation_id'] = $arr['conversation_id'] ?? '';
     $arr['parent_message_id'] = $arr['parent_message_id'] ?? uuid4();
     
-	$openai = openai_chat($arr);
-	
-	// highlight php code 
-	$openai["message"] = replace_html(trim($openai["message"]));
-	
+  $openai = openai_chat($arr);
+  
+  // highlight php code 
+  $openai["message"] = replace_html(trim($openai["message"]));
+  
     die(json_encode($openai));
   }
 }
@@ -118,38 +118,38 @@ function uuid4() {
 
 // replace_html
 function replace_html($string) {
-	
-	// find_markdown
-	preg_match_all('/(?:```|`)(.*?)(?:```|`)/s', $string, $find_markdown);
-	foreach($find_markdown[1] as $i=>$find)
-		$string = preg_replace('~'.preg_quote($find).'~', "-find_markdown{$i}-", $string, 1);
-	
-	if(empty($find_markdown[1])){
-		
-		// find_php
-		preg_match_all('/(<\?(?:[^\s\n]*)?[\s\n]+.*?\?>)/s', $string, $find_php);
-		foreach($find_php[1] as $i=>$find)
-			$string = preg_replace('~'.preg_quote($find).'~', "-find_php{$i}-", $string, 1);
-			
-		// htmlspecialchars other code
-		$string = htmlspecialchars($string);
-		$string = str_replace("\n", '<br>', $string);
-		
-		// return find_php and highlight_string
-		preg_match_all('/(-find_php[0-9]+?-)/s', $string, $m);
-		foreach($m[1] as $i=>$find){
-			$find_php[1][$i] = highlight_string($find_php[1][$i], true);
-			$string = preg_replace('~'.preg_quote($find).'~', $find_php[1][$i], $string, 1);
-		}
-		
-	}
-	else {
-		
-		// return find_markdown
-		preg_match_all('~(?:```|`)(-find_markdown[0-9]+?-)(?:```|`)~s', $string, $m);
-		foreach($m[1] as $i=>$find)
-			$string = preg_replace('~'.preg_quote($find).'~', $find_markdown[1][$i], $string, 1);
-			
-	}
-	return $string;
+  
+  // find_markdown
+  preg_match_all('/(?:```|`)(.*?)(?:```|`)/s', $string, $find_markdown);
+  foreach($find_markdown[1] as $i=>$find)
+    $string = preg_replace('~'.preg_quote($find).'~', "-find_markdown{$i}-", $string, 1);
+  
+  if(empty($find_markdown[1])){
+    
+    // find_php
+    preg_match_all('/(<\?(?:[^\s\n]*)?[\s\n]+.*?\?>)/s', $string, $find_php);
+    foreach($find_php[1] as $i=>$find)
+      $string = preg_replace('~'.preg_quote($find).'~', "-find_php{$i}-", $string, 1);
+      
+    // htmlspecialchars other code
+    $string = htmlspecialchars($string);
+    $string = str_replace("\n", '<br>', $string);
+    
+    // return find_php and highlight_string
+    preg_match_all('/(-find_php[0-9]+?-)/s', $string, $m);
+    foreach($m[1] as $i=>$find){
+      $find_php[1][$i] = highlight_string($find_php[1][$i], true);
+      $string = preg_replace('~'.preg_quote($find).'~', $find_php[1][$i], $string, 1);
+    }
+    
+  }
+  else {
+    
+    // return find_markdown
+    preg_match_all('~(?:```|`)(-find_markdown[0-9]+?-)(?:```|`)~s', $string, $m);
+    foreach($m[1] as $i=>$find)
+      $string = preg_replace('~'.preg_quote($find).'~', $find_markdown[1][$i], $string, 1);
+      
+  }
+  return $string;
 }
