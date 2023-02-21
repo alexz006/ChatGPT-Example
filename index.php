@@ -16,33 +16,33 @@ include "openai_api.php"; // API
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous"
     >
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/marked@3.0.7/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@3.0.7/marked.min.js"></script>
     <title>ChatGPT</title>
   </head>
   <body>
     <div class="container">
       <h2 class="text-center">ChatGPT</h2>
     <form method="post">
-		<div class="row">
-			<div class="form-group col-12">
-			  <input type="text" class="form-control" id="conversationId" placeholder="set chat id or leave blank to start a new chat" <?=!function_exists('openai_chat')?'style="display:none"':''?> value="">
-			</div>
-			<div class="messages col-12" id="messages">
-			  <!-- Messages will be displayed here -->
-			</div>
+    <div class="row">
+      <div class="form-group col-12">
+        <input type="text" class="form-control" id="conversationId" placeholder="set chat id or leave blank to start a new chat" <?=!function_exists('openai_chat')?'style="display:none"':''?> value="">
+      </div>
+      <div class="messages col-12" id="messages">
+        <!-- Messages will be displayed here -->
+      </div>
         </div>
-		<div class="row">
-			<div class="form-group col-9">
-			  <textarea rows="1" class="form-control" id="messageInput" placeholder="Enter a message"></textarea>
-			</div>
-			<div class="col-3">
-				<button type="submit" class="btn btn-primary w-100" id="sendMessage">
-				  Send
-				</button>
-			</div>
-		</div>
+    <div class="row">
+      <div class="form-group col-9">
+        <textarea rows="1" class="form-control" id="messageInput" placeholder="Enter a message"></textarea>
+      </div>
+      <div class="col-3">
+        <button type="submit" class="btn btn-primary w-100" id="sendMessage">
+          Send
+        </button>
+      </div>
+    </div>
       </form>
     </div>
   </body>
@@ -59,20 +59,20 @@ include "openai_api.php"; // API
     messageInput.focus();
   
     // Send message when submit button is clicked
-	function sendMessageHandler(event) {
-	  if (event.type != "click" && !(event.type == "keydown" && event.ctrlKey && event.keyCode == 13))
-		return;
+  function sendMessageHandler(event) {
+    if (event.type != "click" && !(event.type == "keydown" && event.ctrlKey && event.keyCode == 13))
+    return;
       event.preventDefault();
-	  
-	  // Get the message from the input field
+    
+    // Get the message from the input field
       const message = messageInput.value;
-	  if (!message.trim()) {
-		  messageInput.focus();
-		  return;
-	  }
-	  
+    if (!message.trim()) {
+      messageInput.focus();
+      return;
+    }
+    
       const conversation_id = conversationId.value;
-	  
+    
       sendMessage.innerText = 'loading...';
       conversationId.disabled = true;
       sendMessage.disabled = true;
@@ -86,7 +86,7 @@ include "openai_api.php"; // API
 
       // Clear the input field
       messageInput.value = "";
-	  messageInputResize();
+    messageInputResize();
 
       // Send the message to the server
       fetch('', {
@@ -111,56 +111,56 @@ include "openai_api.php"; // API
         // Display the response from the server
         const messageElement = document.createElement("div");
         const p = document.createElement("p");
-		
+    
         if(data.hasOwnProperty('error')){
           p.innerHTML = 'Server: ' + data.error.msg;
         }
         else if (data.hasOwnProperty('message')) {
-		  p.innerHTML = 'Server: ' + marked(data.message);
+      p.innerHTML = 'Server: ' + marked(data.message);
           conversationId.value = data.conversation_id; // set conversation_id
           parent_message_id = data.parent_message_id; // set parent_message_id
         }
         messageElement.appendChild(p);
-		messages.appendChild(document.createElement("hr"));
+    messages.appendChild(document.createElement("hr"));
         messages.appendChild(messageElement);
-		document.querySelectorAll("pre code").forEach((block) => {
+    document.querySelectorAll("pre code").forEach((block) => {
           hljs.highlightBlock(block);
         });
       })
       .catch(error => {
         console.error(error);
-		sendMessage.innerText = 'Send';
+    sendMessage.innerText = 'Send';
         sendMessage.disabled = false;
         messageInput.disabled = false;
         messageInput.focus();
       });
     }
-	
-	sendMessage.addEventListener("click", sendMessageHandler);
-	document.addEventListener("keydown", sendMessageHandler);
-	
-	/*--------------------*/
-	
-	function messageInputResize() {
-	  messageInput.style.height = "auto";
-	  messageInput.style.height = (messageInput.scrollHeight+2)+"px";
-	}
-	messageInput.addEventListener("input", messageInputResize);
-	
-	function replaceHTML(str) {
-	  const jsEntities = [
-		['&', '&amp;'],
-		['<', '&lt;'],
-		['>', '&gt;'],
-		['\'', '&#39;'],
-		['"', '&quot;'],
-		['\n', '<br>'],
-		['\t', '&nbsp;&nbsp;']
-	  ];
-	  for (let i = 0; i < jsEntities.length; i++) {
-		str = str.replace(new RegExp(jsEntities[i][0], 'g'), jsEntities[i][1]);
-	  }
-	  return str;
-	}
+  
+  sendMessage.addEventListener("click", sendMessageHandler);
+  document.addEventListener("keydown", sendMessageHandler);
+  
+  /*--------------------*/
+  
+  function messageInputResize() {
+    messageInput.style.height = "auto";
+    messageInput.style.height = (messageInput.scrollHeight+2)+"px";
+  }
+  messageInput.addEventListener("input", messageInputResize);
+  
+  function replaceHTML(str) {
+    const jsEntities = [
+    ['&', '&amp;'],
+    ['<', '&lt;'],
+    ['>', '&gt;'],
+    ['\'', '&#39;'],
+    ['"', '&quot;'],
+    ['\n', '<br>'],
+    ['\t', '&nbsp;&nbsp;']
+    ];
+    for (let i = 0; i < jsEntities.length; i++) {
+    str = str.replace(new RegExp(jsEntities[i][0], 'g'), jsEntities[i][1]);
+    }
+    return str;
+  }
   </script>
 </html>
