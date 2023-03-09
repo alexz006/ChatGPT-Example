@@ -13,11 +13,18 @@ include "openai_chat_api.php";
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@3.0.7/marked.min.js"></script>
   <title>ChatGPT</title>
+  <style>
+    .selected{
+    font-weight: bold
+  }
+  </style>
 </head>
 
 <body>
   <div class="container">
-    <h2 class="text-center">ChatGPT <small class="h5 font-weight-normal"><a href="/?type=chat">chat.openai.com</a> | <a href="/">API</a></small></h2>
+    <h2 class="text-center">ChatGPT
+    <small class="h5 font-weight-normal"><a href="/" <?= empty($_GET['type']) ? 'class="selected"' : '' ?>>API GPT-3</a> | <a href="/?type=turbo" <?= $_GET['type']=='turbo' ? 'class="selected"' : '' ?>>API GPT-3.5 turbo</a> | <a href="/?type=chat"<?= $_GET['type']=='chat' ? 'class="selected"' : '' ?>>Not an API (chat.openai.com)</a></small>
+  </h2>
     <form method="post">
       <div class="row">
         <div class="form-group col-12">
@@ -92,6 +99,7 @@ include "openai_chat_api.php";
         },
         body: JSON.stringify({
           <?= $_GET['type']=='chat' ? "openai_type: 'chat'," : '' ?>
+          <?= $_GET['type']=='turbo' ? "openai_type: 'turbo'," : '' ?>
           message: message,
           conversation_id: conversation_id,
           parent_message_id: parent_message_id
