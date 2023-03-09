@@ -5,28 +5,40 @@
 
 set_time_limit(120);
 
-define('OPENAI_API_KEY', ''); // https://platform.openai.com/account/api-keys
+// To use the official API (GPT-3 and GPT-3.5 turbo)
+// get OPENAI_API_KEY https://platform.openai.com/account/api-keys
+define('OPENAI_API_KEY', '');
 
-define('COOKIE_PUID', '_puid=user-...'); // cookie: _puid=user-...
+// To use chat.openai.com
+// get cookie "_puid=user-..." - https://chat.openai.com/chat
+define('COOKIE_PUID', '_puid=user-...');
 
-define('ACCESS_TOKEN', ''); // https://chat.openai.com/api/auth/session
+// To use chat.openai.com
+// get ACCESS_TOKEN - https://chat.openai.com/api/auth/session
+define('ACCESS_TOKEN', '');
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){
   $arr = json_decode(file_get_contents('php://input'), true);
   if(!empty($arr['message'])){
-    $openai = [];
     header('Content-Type: application/json');
-    if($arr['openai_type'] == 'chat'){
-        $arr['conversation_id'] = $arr['conversation_id'] ?? '';
-        $arr['parent_message_id'] = $arr['parent_message_id'] ?? uuid4();
-        $openai = openai_chat($arr);
+    
+    $openai = [];
+    
+    if($arr['openai_type'] == 'chat'){ // chat.openai.com
+      $arr['conversation_id'] = $arr['conversation_id'] ?? '';
+      $arr['parent_message_id'] = $arr['parent_message_id'] ?? uuid4();
+      $openai = openai_chat($arr);
     }
-    else
-      $openai = openai_api($arr['message']);
-
+    
+    elseif($arr['openai_type'] == 'turbo') // gpt-3.5-turbo
+      $openai = openai_api_gpt_35_turbo($arr['message']);
+    
+    else // text-davinci-003
+      $openai = openai_api_text_davinci_003($arr['message']);
+    
     if(!empty($openai['message']))
       $openai["message"] = replace_html(trim($openai["message"]));
-
+    
     die(json_encode($openai));
   }
 }
@@ -70,7 +82,7 @@ function openai_chat($arr){
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $response = curl_exec($ch);
   if (curl_errno($ch))
-    return ["error" => ["msg"=>curl_error($ch)]];
+    return ["error" => ["msg"=>'<span style="color:red">' . curl_error($ch) . '</span>']];
   curl_close($ch);
   
   $expl = explode("\n", $response);
@@ -88,15 +100,15 @@ function openai_chat($arr){
   if($last_line){
     $decoded_line = json_decode($last_line, true);
     if (json_last_error() !== JSON_ERROR_NONE)
-      return ["error" => ["msg"=>$last_line]];
+      return ["error" => ["msg"=>'<span style="color:red">' . $last_line . '</span>']];
     
     if(!empty($decoded_line["detail"]))
       return ["error" => (
         is_array($decoded_line["detail"])?
           (!empty($decoded_line["detail"]["message"])?
-      ["msg"=>$decoded_line["detail"]["message"]]:
+      ["msg"=>'<span style="color:red">' . $decoded_line["detail"]["message"] . '</span>']:
       $decoded_line["detail"][0]):
-          ["msg"=>$decoded_line["detail"]]
+          ["msg"=>'<span style="color:red">' . $decoded_line["detail"] . '</span>']
       )];
     
     $message = $decoded_line["message"]["content"]["parts"][0];
@@ -108,10 +120,10 @@ function openai_chat($arr){
       "parent_message_id" => $parent_message_id,
     ];
   }
-  return ["error" => ["msg"=>"unknown"]];
+  return ["error" => ["msg"=> '<span style="color:red">unknown</span>']];
 }
 
-function openai_api($message){
+function openai_api_text_davinci_003($message){
   
   $url = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
   $headers = [
@@ -121,7 +133,7 @@ function openai_api($message){
   $data = [
     "prompt" => $message,
     'max_tokens' => 300,
-    "temperature" => 0.9,
+    "temperature" => 0.5,
   ];
   
   $ch = curl_init();
@@ -153,6 +165,51 @@ function openai_api($message){
   return $return;
 }
 
+function openai_api_gpt_35_turbo($message){
+  
+  $url = 'https://api.openai.com/v1/chat/completions';
+  $headers = [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . OPENAI_API_KEY
+  ];
+  $data = [
+    "model" => "gpt-3.5-turbo",
+    "messages" => [
+    ["role" => "user", "content" => $message]
+  ],
+    'max_tokens' => 300,
+    "temperature" => 0.5,
+  ];
+  
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $response  = curl_exec($ch);
+  if (curl_errno($ch)) {
+    $return = [
+      'error' => ['msg'=>'<span style="color:red">' . curl_error($ch) . '</span>']
+    ];
+    curl_close($ch);
+    return $return;
+  }
+  curl_close($ch);
+  $arr = json_decode($response, 1);
+
+  $return = [
+    'message' => ''
+  ];
+  if(!empty($arr['error'])){
+    $return['error'] = ['msg'=>'<span style="color:red">' . $arr['error']['message'] . '</span>'];
+  }
+  elseif(!empty($arr['choices'])){
+    $return['message'] = trim($arr['choices'][0]['message']['content']);
+  }
+  return $return;
+}
+
 /*--------------------*/
 
 // get uuid4
@@ -178,7 +235,7 @@ function replace_html($string) {
     preg_match_all('/(<\?(?:[^\s\n]*)?[\s\n]+.*?\?>)/s', $string, $find_php);
     foreach($find_php[1] as $i=>$find){
       $string = preg_replace('~'.preg_quote($find).'~', "-find_php{$i}-", $string, 1);
-	}
+  }
       
     // htmlspecialchars other code
     $string = htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
@@ -198,7 +255,7 @@ function replace_html($string) {
     preg_match_all('~(?:```|`)(-find_markdown[0-9]+?-)(?:```|`)~s', $string, $m);
     foreach($m[1] as $i=>$find){
       $string = preg_replace('~'.preg_quote($find).'~', $find_markdown[1][$i], $string, 1);
-	}
+  }
     
   }
   return $string;
