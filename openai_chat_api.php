@@ -30,10 +30,10 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
       $openai = openai_chat($arr);
     }
     
-    elseif($arr['openai_type'] == 'turbo') // gpt-3.5-turbo
+    elseif($arr['openai_type'] == 'turbo')// gpt-3.5-turbo
       $openai = openai_api_gpt_35_turbo($arr['message']);
     
-    else // text-davinci-003
+    else // gpt-3
       $openai = openai_api_text_davinci_003($arr['message']);
     
     if(!empty($openai['message']))
@@ -59,7 +59,12 @@ function openai_chat($arr){
         "role" => "user"
       ]
     ],
-    "model" => "text-davinci-002-render-sha", // sha - default, paid - legacy
+    /*
+     text-davinci-002-render-sha - default
+     text-davinci-002-render-paid - legacy
+     gpt-4
+    */
+    "model" => $arr['chat_model'],
     "parent_message_id" => $arr['parent_message_id']
   ];
   
