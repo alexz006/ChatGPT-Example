@@ -2,6 +2,8 @@
 
 A simple example of using the `GPT-3 API`, `GPT-3.5-turbo API`, and the unofficial API from `chat.openai.com (GPT-3.5 and GPT-4)`.
 
+This example displays a chat in the browser where you can choose a GPT model. If you selected "chat.openai.com", you can specify a chatID, and support for communicating with the AI in dialogue mode will also be available.
+
 ![ChatGPT-Example](gpt-4.jpg)
 
 ## Usage
