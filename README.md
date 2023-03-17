@@ -1,10 +1,8 @@
-# ChatGPT-PHP-Example
+# ChatGPT PHP Example
 
-A simple example of an API request and the output of messages to the browser
+A simple example of using the `GPT-3 API`, `GPT-3.5-turbo API`, and the unofficial API from `chat.openai.com (GPT-3.5 and GPT-4)`.
 
-The code for this example was generated using ChatGPT
-
-![ChatGPT-Example](chatgpt35.jpg)
+![ChatGPT-Example](gpt-4.jpg)
 
 ## Usage
 
