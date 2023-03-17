@@ -3,7 +3,6 @@ include "openai_chat_api.php";
 
 ?><!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,24 +14,32 @@ include "openai_chat_api.php";
   <title>ChatGPT</title>
   <style>
     .selected{
-    font-weight: bold
-  }
+      font-weight: bold
+    }
   </style>
 </head>
-
 <body>
   <div class="container">
-    <h2 class="text-center">ChatGPT
+    <h4 class="text-center">
     <small class="h5 font-weight-normal"><a href="/" <?= empty($_GET['type']) ? 'class="selected"' : '' ?>>API GPT-3</a> | <a href="/?type=turbo" <?= $_GET['type']=='turbo' ? 'class="selected"' : '' ?>>API GPT-3.5 turbo</a> | <a href="/?type=chat"<?= $_GET['type']=='chat' ? 'class="selected"' : '' ?>>Not an API (chat.openai.com)</a></small>
-  </h2>
+  </h4>
     <form method="post">
-      <div class="row">
-        <div class="form-group col-12">
-          <input type="text" class="form-control" id="conversationId" placeholder="set chat id or leave blank to start a new chat" <?= $_GET['type']=='chat' ? '' : 'style="display:none"' ?> value="">
-        </div>
-        <div class="messages col-12" id="messages">
-          <!-- Messages will be displayed here -->
-        </div>
+    <div class="row form-group" <?= $_GET['type']=='chat' ? '' : 'style="display:none"' ?>>
+      <div class="col-9">
+        <input type="text" class="form-control" id="conversationId" placeholder="set chat id or leave blank to start a new chat" value="">
+      </div>
+      <div class="col-3">
+        <select class="form-control" id="chatModel">
+        <option value="text-davinci-002-render-sha">Default (GPT-3.5)</option>
+        <option value="text-davinci-002-render-paid">Legacy (GPT-3.5)</option>
+        <option value="gpt-4">GPT-4</option>
+        </select>
+      </div>
+    </div>
+    <div class="row"> 
+    <div class="messages col-12" id="messages">
+      <!-- Messages will be displayed here -->
+    </div>
       </div>
       <div class="row">
         <div class="form-group col-9">
@@ -46,7 +53,6 @@ include "openai_chat_api.php";
       </div>
     </form>
   </div>
-
 <script>
   // Get the input field and submit button
   const conversationId = document.getElementById("conversationId");
@@ -83,7 +89,7 @@ include "openai_chat_api.php";
 
     // Create a new message element
     const messageElement = document.createElement("div");
-    messageElement.innerHTML = '<p>You: ' + replaceHTML(message) + '</p>';
+    messageElement.innerHTML = '<p><b>You</b>:<br>' + replaceHTML(message) + '</p>';
     messages.appendChild(document.createElement("hr"));
     messages.appendChild(messageElement);
 
@@ -101,6 +107,7 @@ include "openai_chat_api.php";
           <?= $_GET['type']=='chat' ? "openai_type: 'chat'," : '' ?>
           <?= $_GET['type']=='turbo' ? "openai_type: 'turbo'," : '' ?>
           message: message,
+          chat_model: document.getElementById("chatModel").value,
           conversation_id: conversation_id,
           parent_message_id: parent_message_id
         }),
@@ -118,9 +125,9 @@ include "openai_chat_api.php";
         const p = document.createElement("p");
 
         if (data.hasOwnProperty('error')) {
-          p.innerHTML = 'Server: ' + data.error.msg;
+          p.innerHTML = '<b>AI</b>: ' + data.error.msg;
         } else if (data.hasOwnProperty('message')) {
-          p.innerHTML = 'Server: ' + marked(data.message);
+          p.innerHTML = '<b>AI</b>: ' + marked(data.message);
           if (data.hasOwnProperty('conversation_id')) {
             parent_message_id = data.parent_message_id; // set parent_message_id
             conversationId.value = data.conversation_id; // set conversation_id
